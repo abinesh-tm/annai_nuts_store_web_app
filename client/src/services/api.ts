@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const api = axios.create({
   baseURL: '/api',
@@ -26,6 +27,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      toast.error('Session expired. Please login again.');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';

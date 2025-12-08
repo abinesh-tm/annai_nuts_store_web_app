@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { register, clearError } from '../../store/features/auth/authSlice';
 import Input from '../../components/common/Input';
@@ -31,6 +32,7 @@ const RegisterPage: React.FC = () => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match!');
       return;
     }
 
@@ -40,9 +42,10 @@ const RegisterPage: React.FC = () => {
         email: formData.email,
         password: formData.password,
       })).unwrap();
+      toast.success('Registration successful! Welcome!');
       navigate('/');
-    } catch (error) {
-      console.error('Registration error:', error);
+    } catch (error: any) {
+      toast.error(error || 'Registration failed. Please try again.');
     }
   };
 
@@ -50,11 +53,6 @@ const RegisterPage: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-cream px-4">
       <Card className="w-full max-w-md p-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Sign Up</h1>
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             label="Name"

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { MagnifyingGlassIcon, HeartIcon, ShoppingCartIcon, UserIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { logout } from '../../store/features/auth/authSlice';
@@ -16,6 +17,7 @@ const Navbar: React.FC = () => {
 
   const handleLogout = () => {
     dispatch(logout());
+    toast.info('Logged out successfully');
     navigate('/');
   };
 

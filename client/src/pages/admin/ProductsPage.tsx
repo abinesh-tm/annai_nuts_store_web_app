@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import { MagnifyingGlassIcon, FunnelIcon, PlusIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { fetchProducts, deleteProduct } from '../../store/features/products/productsSlice';
@@ -18,7 +19,12 @@ const ProductsPage: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
-      await dispatch(deleteProduct(id));
+      try {
+        await dispatch(deleteProduct(id)).unwrap();
+        toast.success('Product deleted successfully');
+      } catch (error: any) {
+        toast.error(error || 'Failed to delete product');
+      }
     }
   };
 

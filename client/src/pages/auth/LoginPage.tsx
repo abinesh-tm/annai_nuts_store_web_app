@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { login, clearError } from '../../store/features/auth/authSlice';
 import Input from '../../components/common/Input';
@@ -30,9 +31,10 @@ const LoginPage: React.FC = () => {
     try {
       await dispatch(login(formData)).unwrap();
       const loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
+      toast.success('Login successful! Welcome back!');
       navigate(loggedInUser.role === 'admin' ? '/admin/dashboard' : '/');
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (error: any) {
+      toast.error(error || 'Login failed. Please check your credentials.');
     }
   };
 
@@ -40,11 +42,6 @@ const LoginPage: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-cream px-4">
       <Card className="w-full max-w-md p-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Sign In</h1>
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             label="Email"
