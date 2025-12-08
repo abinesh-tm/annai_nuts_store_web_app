@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { MagnifyingGlassIcon, BellIcon } from '@heroicons/react/24/outline';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { logout } from '../../store/features/auth/authSlice';
@@ -11,6 +12,7 @@ const Topbar: React.FC = () => {
 
   const handleLogout = () => {
     dispatch(logout());
+    toast.info('Logged out successfully');
     window.location.href = '/login';
   };
 

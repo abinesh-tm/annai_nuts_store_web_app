@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { ShoppingCartIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { fetchProducts } from '../../store/features/products/productsSlice';
@@ -16,7 +17,12 @@ const ProductListPage: React.FC = () => {
   }, [dispatch]);
 
   const handleAddToCart = (product: any) => {
+    if (product.stock === 0) {
+      toast.error('Product is out of stock');
+      return;
+    }
     dispatch(addToCart({ product, quantity: 1 }));
+    toast.success(`${product.name} added to cart!`);
   };
 
   if (isLoading) {

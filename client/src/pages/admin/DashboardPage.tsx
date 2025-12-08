@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { fetchOrders } from '../../store/features/orders/ordersSlice';
@@ -18,8 +19,8 @@ const DashboardPage: React.FC = () => {
       try {
         const response = await api.get('/admin/dashboard');
         setStats(response.data.data);
-      } catch (error) {
-        console.error('Failed to fetch dashboard stats:', error);
+      } catch (error: any) {
+        toast.error(error?.response?.data?.message || 'Failed to fetch dashboard stats');
       } finally {
         setLoading(false);
       }

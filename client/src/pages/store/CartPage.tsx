@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { TrashIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { removeFromCart, updateQuantity, clearCart } from '../../store/features/cart/cartSlice';
@@ -58,14 +59,22 @@ const CartPage: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => dispatch(updateQuantity({ productId: item.product._id, quantity: item.quantity - 1 }))}
+                          onClick={() => {
+                            dispatch(updateQuantity({ productId: item.product._id, quantity: item.quantity - 1 }));
+                            if (item.quantity > 1) {
+                              toast.info('Quantity updated');
+                            }
+                          }}
                           className="p-1 border border-gray-300 rounded hover:bg-gray-100"
                         >
                           <MinusIcon className="w-4 h-4" />
                         </button>
                         <span className="w-12 text-center">{item.quantity}</span>
                         <button
-                          onClick={() => dispatch(updateQuantity({ productId: item.product._id, quantity: item.quantity + 1 }))}
+                          onClick={() => {
+                            dispatch(updateQuantity({ productId: item.product._id, quantity: item.quantity + 1 }));
+                            toast.info('Quantity updated');
+                          }}
                           className="p-1 border border-gray-300 rounded hover:bg-gray-100"
                         >
                           <PlusIcon className="w-4 h-4" />
@@ -76,7 +85,10 @@ const CartPage: React.FC = () => {
                           ${(item.product.price * item.quantity).toFixed(2)}
                         </span>
                         <button
-                          onClick={() => dispatch(removeFromCart(item.product._id))}
+                          onClick={() => {
+                            dispatch(removeFromCart(item.product._id));
+                            toast.success(`${item.product.name} removed from cart`);
+                          }}
                           className="text-red-600 hover:text-red-700"
                         >
                           <TrashIcon className="w-5 h-5" />
@@ -88,7 +100,10 @@ const CartPage: React.FC = () => {
               ))}
             </div>
             <div className="mt-6">
-              <Button variant="outline" onClick={() => dispatch(clearCart())}>
+              <Button variant="outline" onClick={() => {
+                dispatch(clearCart());
+                toast.info('Cart cleared');
+              }}>
                 Clear Cart
               </Button>
             </div>

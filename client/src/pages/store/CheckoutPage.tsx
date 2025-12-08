@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { createOrder } from '../../store/features/orders/ordersSlice';
 import { clearCart } from '../../store/features/cart/cartSlice';
@@ -57,9 +58,10 @@ const CheckoutPage: React.FC = () => {
       })).unwrap();
       
       dispatch(clearCart());
+      toast.success('Order placed successfully! Thank you for your purchase!');
       navigate('/orders/success');
-    } catch (error) {
-      console.error('Checkout error:', error);
+    } catch (error: any) {
+      toast.error(error || 'Failed to place order. Please try again.');
     }
   };
 

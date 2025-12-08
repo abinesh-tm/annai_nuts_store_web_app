@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import { MagnifyingGlassIcon, FunnelIcon, EyeIcon, TruckIcon } from '@heroicons/react/24/outline';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { fetchOrders, updateOrderStatus } from '../../store/features/orders/ordersSlice';
@@ -17,7 +18,12 @@ const OrdersPage: React.FC = () => {
   }, [dispatch]);
 
   const handleShip = async (orderId: string) => {
-    await dispatch(updateOrderStatus({ id: orderId, status: 'shipped' }));
+    try {
+      await dispatch(updateOrderStatus({ id: orderId, status: 'shipped' })).unwrap();
+      toast.success('Order status updated to shipped');
+    } catch (error: any) {
+      toast.error(error || 'Failed to update order status');
+    }
   };
 
   const getStatusBadge = (status: string) => {
