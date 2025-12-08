@@ -1,4 +1,4 @@
-# Anand Dry Fruits Store - E-Commerce Platform
+# Annai Dry Fruits Store - E-Commerce Platform
 
 A full-stack MERN (MongoDB, Express, React, Node.js) e-commerce application with TypeScript, featuring a customer storefront and admin panel.
 
