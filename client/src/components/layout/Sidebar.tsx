@@ -6,9 +6,6 @@ import {
   ShoppingCartIcon,
   UserGroupIcon,
   Cog6ToothIcon,
-  TagIcon,
-  ChartBarIcon,
-  DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 
 interface NavItem {
@@ -22,10 +19,6 @@ const navItems: NavItem[] = [
   { name: 'Products', path: '/admin/products', icon: ShoppingBagIcon },
   { name: 'Orders', path: '/admin/orders', icon: ShoppingCartIcon },
   { name: 'Customers', path: '/admin/customers', icon: UserGroupIcon },
-  { name: 'Inventory', path: '/admin/inventory', icon: Cog6ToothIcon },
-  { name: 'Coupons', path: '/admin/coupons', icon: TagIcon },
-  { name: 'Reports', path: '/admin/reports', icon: ChartBarIcon },
-  { name: 'Activity Log', path: '/admin/activity-log', icon: DocumentTextIcon },
   { name: 'Settings', path: '/admin/settings', icon: Cog6ToothIcon },
 ];
 

@@ -12,20 +12,20 @@ import ProductListPage from '../pages/store/ProductListPage';
 import ProductDetailPage from '../pages/store/ProductDetailPage';
 import CartPage from '../pages/store/CartPage';
 import CheckoutPage from '../pages/store/CheckoutPage';
+import Aboutpage from '../pages/store/Abouthpage';
+import Contactpage from '../pages/store/ContactPage';
+import WishlistPage from '@/pages/store/wishlistPage';
 
 // Auth Pages
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
+
 
 // Admin Pages
 import DashboardPage from '../pages/admin/DashboardPage';
 import ProductsPage from '../pages/admin/ProductsPage';
 import OrdersPage from '../pages/admin/OrdersPage';
 import CustomersPage from '../pages/admin/CustomersPage';
-import InventoryPage from '../pages/admin/InventoryPage';
-import CouponsPage from '../pages/admin/CouponsPage';
-import ReportsPage from '../pages/admin/ReportsPage';
-import ActivityLogPage from '../pages/admin/ActivityLogPage';
 import SettingsPage from '../pages/admin/SettingsPage';
 
 // Protected Route Component
@@ -56,6 +56,10 @@ const AppRouter: React.FC = () => {
           <Route path="products" element={<ProductListPage />} />
           <Route path="products/:id" element={<ProductDetailPage />} />
           <Route path="cart" element={<CartPage />} />
+          <Route path="/contact" element={<Contactpage />} />
+          <Route path="/about" element={<Aboutpage />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
+
           <Route
             path="checkout"
             element={
@@ -69,6 +73,7 @@ const AppRouter: React.FC = () => {
         {/* Auth Routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        
 
         {/* Admin Routes */}
         <Route
@@ -84,10 +89,6 @@ const AppRouter: React.FC = () => {
           <Route path="products" element={<ProductsPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="customers" element={<CustomersPage />} />
-          <Route path="inventory" element={<InventoryPage />} />
-          <Route path="coupons" element={<CouponsPage />} />
-          <Route path="reports" element={<ReportsPage />} />
-          <Route path="activity-log" element={<ActivityLogPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
 
