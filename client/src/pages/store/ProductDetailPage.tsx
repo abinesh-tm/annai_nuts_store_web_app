@@ -6,6 +6,7 @@ import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { fetchProductById } from '../../store/features/products/productsSlice';
 import { addToCart } from '../../store/features/cart/cartSlice';
 import Button from '../../components/common/Button';
+import { addToWishlist } from '@/store/features/wishlist/wishlistSlice';
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -112,7 +113,12 @@ const ProductDetailPage: React.FC = () => {
               <ShoppingCartIcon className="w-5 h-5 inline mr-2" />
               Add to Cart
             </Button>
-            <button className="p-3 border border-gray-300 rounded-lg hover:bg-gray-100">
+            <button 
+            onClick={() =>{
+              dispatch(addToWishlist(product));
+              toast.success("Added to wishlist ❤️");
+            }}
+            className="p-3 border border-gray-300 rounded-lg hover:bg-gray-100">
               <HeartIcon className="w-6 h-6 text-gray-700" />
             </button>
           </div>

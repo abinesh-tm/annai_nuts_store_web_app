@@ -20,6 +20,8 @@ const Navbar: React.FC = () => {
     toast.info('Logged out successfully');
     navigate('/');
   };
+  const { items: wishlistItems } = useAppSelector((state) => state.wishlist);
+
 
   return (
     <>
@@ -51,8 +53,7 @@ const Navbar: React.FC = () => {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-8">
               <Link to="/" className="text-gray-700 hover:text-primary transition">Home</Link>
-              <Link to="/products" className="text-gray-700 hover:text-primary transition">Shop</Link>
-              <Link to="/categories" className="text-gray-700 hover:text-primary transition">Categories</Link>
+              <Link to="/products" className="text-gray-700 hover:text-primary transition">Product</Link>
               <Link to="/about" className="text-gray-700 hover:text-primary transition">About</Link>
               <Link to="/contact" className="text-gray-700 hover:text-primary transition">Contact</Link>
             </div>
@@ -71,9 +72,16 @@ const Navbar: React.FC = () => {
 
               {/* Icons */}
               <div className="flex items-center gap-4">
-                <Link to="/wishlist" className="relative">
-                  <HeartIcon className="w-6 h-6 text-gray-700 hover:text-primary" />
-                </Link>
+                  <Link to="/wishlist" className="relative">
+                   <HeartIcon className="w-6 h-6 text-gray-700 hover:text-primary" />
+
+                       {wishlistItems.length > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                       {wishlistItems.length}
+                   </span>
+              )}
+                   </Link>
+
                 <Link to="/cart" className="relative">
                   <ShoppingCartIcon className="w-6 h-6 text-gray-700 hover:text-primary" />
                   {cartItemCount > 0 && (
@@ -82,9 +90,13 @@ const Navbar: React.FC = () => {
                     </span>
                   )}
                 </Link>
-                <Link to={user ? "/profile" : "/login"} className="relative">
-                  <UserIcon className="w-6 h-6 text-gray-700 hover:text-primary" />
+                <Link
+                   to={user ? "/profile" : "/login"}
+                   className="relative cursor-pointer z-50"
+                   >
+                <UserIcon className="w-6 h-6 text-gray-700 hover:text-primary" />
                 </Link>
+
               </div>
 
               {/* Mobile Menu Button */}
@@ -107,8 +119,7 @@ const Navbar: React.FC = () => {
           <div className="md:hidden border-t">
             <div className="container mx-auto px-4 py-4 flex flex-col gap-4">
               <Link to="/" className="text-gray-700 hover:text-primary">Home</Link>
-              <Link to="/products" className="text-gray-700 hover:text-primary">Shop</Link>
-              <Link to="/categories" className="text-gray-700 hover:text-primary">Categories</Link>
+              <Link to="/products" className="text-gray-700 hover:text-primary">Product</Link>
               <Link to="/about" className="text-gray-700 hover:text-primary">About</Link>
               <Link to="/contact" className="text-gray-700 hover:text-primary">Contact</Link>
               <div className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 mt-2">
