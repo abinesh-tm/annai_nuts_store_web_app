@@ -196,79 +196,80 @@ const OrdersPage: React.FC = () => {
       </div>
 
       {/* Filters Card */}
-      <Card className="p-4 mb-6">
-        <div className="flex flex-wrap gap-3 items-center">
-          {/* Search Bar - Reduced width */}
-          <div className="relative flex-1 min-w-[250px] max-w-[400px]">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search orders..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-primary"
-            />
-          </div>
+     <Card className="p-4 mb-6 w-full">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-center">
 
-          {/* Status Filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-primary"
-          >
-            <option value="All">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="processing">Processing</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+    {/* Search Bar */}
+    <div className="relative w-full">
+      <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+      <input
+        type="text"
+        placeholder="Search orders..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-primary"
+      />
+    </div>
 
-          {/* Date Filters */}
-          <input
-            type="date"
-            value={dateFrom}
-            onChange={(e) => {
-              const v = e.target.value;
-              setDateFrom(v);
-              if (dateTo && v > dateTo) {
-                setDateTo(v);
-              }
-            }}
-            className="border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-primary"
-            placeholder="From Date"
-          />
-          
-          <input
-            type="date"
-            value={dateTo}
-            onChange={(e) => {
-              const v = e.target.value;
-              if (dateFrom && v < dateFrom) {
-                alert("'To Date' cannot be earlier than 'From Date'");
-                return;
-              }
-              setDateTo(v);
-            }}
-            className="border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-primary"
-            placeholder="To Date"
-          />
+    {/* Status Filter */}
+    <select
+      value={statusFilter}
+      onChange={(e) => setStatusFilter(e.target.value as any)}
+      className="border border-gray-300 px-3 py-2 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-admin-primary"
+    >
+      <option value="All">All Status</option>
+      <option value="pending">Pending</option>
+      <option value="processing">Processing</option>
+      <option value="shipped">Shipped</option>
+      <option value="delivered">Delivered</option>
+      <option value="cancelled">Cancelled</option>
+    </select>
 
-          {/* Reset Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setSearchTerm('');
-              setStatusFilter('All');
-              setDateFrom('');
-              setDateTo('');
-            }}
-          >
-            Reset
-          </Button>
-        </div>
-      </Card>
+    {/* Date From */}
+    <input
+      type="date"
+      value={dateFrom}
+      onChange={(e) => {
+        const v = e.target.value;
+        setDateFrom(v);
+        if (dateTo && v > dateTo) setDateTo(v);
+      }}
+      className="border border-gray-300 px-3 py-2 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-admin-primary"
+    />
+
+    {/* Date To */}
+    <input
+      type="date"
+      value={dateTo}
+      onChange={(e) => {
+        const v = e.target.value;
+        if (dateFrom && v < dateFrom) {
+          alert("'To Date' cannot be earlier than 'From Date'");
+          return;
+        }
+        setDateTo(v);
+      }}
+      className="border border-gray-300 px-3 py-2 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-admin-primary"
+    />
+
+    {/* Reset button */}
+    <Button
+      variant="outline"
+      size="sm"
+      className="w-full"
+      onClick={() => {
+        setSearchTerm('');
+        setStatusFilter('All');
+        setDateFrom('');
+        setDateTo('');
+      }}
+    >
+      Reset
+    </Button>
+
+  </div>
+</Card>
+
 
       {/* Orders Table */}
       {isLoading ? (
@@ -279,53 +280,53 @@ const OrdersPage: React.FC = () => {
           </div>
         </Card>
       ) : (
-        <Card className="overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px]">
+       <Card className="overflow-hidden max-w-[950px] mx-auto">
+  <div className="overflow-x-auto">
+    <table className="w-auto min-w-[700px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Order ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Customer</th>
+                  <th className="px-4 py-3  text-left text-xs font-semibold text-gray-700 uppercase">Customer</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Date</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Items</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Total</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Actions</th>
+                  <th className="px-4 py-3  text-left text-xs font-semibold text-gray-700 uppercase">Items</th>
+                  <th className="px-4 py-3  text-left text-xs font-semibold text-gray-700 uppercase">Total</th>
+                  <th className="px-4 py-3  text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
+                  <th className="px-4 py-3  text-left text-xs font-semibold text-gray-700 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {filteredOrders.map((order: OrderType) => (
                   <tr key={order._id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3">
+                    <td className="px-1 py-1">
                       <span className="text-xs font-medium text-gray-900">{order._id.slice(-8)}</span>
                     </td>
 
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 ">
                       <div>
                         <p className="text-sm font-medium text-gray-900">{getCustomerName(order)}</p>
                         <p className="text-xs text-gray-500 truncate max-w-[150px]">{getCustomerEmail(order)}</p>
                       </div>
                     </td>
 
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 ">
                       <span className="text-xs text-gray-600 whitespace-nowrap">
                         {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '-'}
                       </span>
                     </td>
 
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 ">
                       <span className="text-sm text-gray-600">{order.orderItems?.length || 0}</span>
                     </td>
 
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 ">
                       <span className="text-sm font-medium text-gray-900">
                         ${Number(order.totalPrice || order.itemsPrice || 0).toFixed(2)}
                       </span>
                     </td>
 
-                    <td className="px-4 py-3">{getStatusBadge(order.status)}</td>
+                    <td className="px-4 py-3 ">{getStatusBadge(order.status)}</td>
 
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 ">
                       <div className="flex gap-1.5">
                         <button
                           onClick={() => setSelectedOrder(order)}
