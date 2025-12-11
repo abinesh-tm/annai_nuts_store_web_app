@@ -48,28 +48,48 @@ export const getOrderById = asyncHandler(async (req: AuthRequest, res: Response)
 export const createOrder = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
   const { orderItems, shippingAddress, paymentMethod } = req.body;
 
+  // Validate order items
   if (!orderItems || orderItems.length === 0) {
     throw new ApiError(400, 'No order items');
   }
 
   let itemsPrice = 0;
 
+  // Validate stock & calculate price
   for (const item of orderItems) {
     const product = await Product.findById(item.product);
+
     if (!product) {
       throw new ApiError(404, `Product ${item.product} not found`);
     }
-    itemsPrice += product.price * item.quantity;
 
-    // Update stock
-    product.stock -= item.quantity;
-    await product.save();
+    // Check stock availability
+    if (product.stock < item.quantity) {
+      throw new ApiError(
+        400,
+        `Not enough stock for ${product.name}. Available: ${product.stock}`
+      );
+    }
+
+    // Calculate total item cost
+    itemsPrice += product.price * item.quantity;
   }
 
+  // After all validations, update stock
+  for (const item of orderItems) {
+    const product = await Product.findById(item.product);
+    if (product) {
+      product.stock -= item.quantity;
+      await product.save();
+    }
+  }
+
+  // Price calculations
   const shippingPrice = itemsPrice > 999 ? 0 : 50;
   const taxPrice = itemsPrice * 0.18;
   const totalPrice = itemsPrice + shippingPrice + taxPrice;
 
+  // Create order
   const order = await Order.create({
     user: req.user?._id,
     orderItems,
@@ -86,6 +106,7 @@ export const createOrder = asyncHandler(async (req: AuthRequest, res: Response):
     data: order,
   });
 });
+
 
 export const updateOrderStatus = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
   const { status } = req.body;
