@@ -1,21 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { Product } from "../../types";
+
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
   PlusIcon,
-  EllipsisVerticalIcon,
+  PencilSquareIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
+
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
+
 import {
   fetchProducts,
   deleteProduct,
+  createProduct,
+  updateProduct,
 } from "../../store/features/products/productsSlice";
+
+import api from "../../services/api";
 import { Table, TableRow, TableCell } from "../../components/common/Table";
 import Button from "../../components/common/Button";
 import Badge from "../../components/common/Badge";
 import Card from "../../components/common/Card";
-
 
 const ProductsPage: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -23,9 +31,10 @@ const ProductsPage: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  // 🔥 Add Product Popup State
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
+  // NEW PRODUCT STATE (use strings, not numbers!)
   const [newProduct, setNewProduct] = useState({
     name: "",
     sku: "",
@@ -36,18 +45,119 @@ const ProductsPage: React.FC = () => {
     description: "",
   });
 
+  // EDIT PRODUCT STATE
+  const [editProduct, setEditProduct] = useState<Product | null>(null);
+
   useEffect(() => {
     dispatch(fetchProducts({ search: searchTerm }));
   }, [dispatch, searchTerm]);
 
+  // =================== BASE64 CONVERTER ===================
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (err) => reject(err);
+    });
+  };
+
+  // =============== IMAGE UPLOAD HANDLER (BASE64) ===============
+  const uploadImage = async (file: File): Promise<string | null> => {
+    try {
+      const base64 = await fileToBase64(file);
+
+      const res = await api.post("/upload/base64", {
+        imageBase64: base64,
+      });
+
+      return res.data.url;
+    } catch (error) {
+      toast.error("Image upload failed");
+      return null;
+    }
+  };
+
+  // =============== ADD PRODUCT =================
+  const handleAddProduct = async () => {
+    try {
+      const payload: Partial<Product> = {
+        name: newProduct.name,
+        sku: newProduct.sku,
+        category: newProduct.category,
+        price: Number(newProduct.price),
+        stock: Number(newProduct.stock),
+        image: newProduct.image,
+        description: newProduct.description,
+        status:
+          Number(newProduct.stock) === 0 ? "out of stock" : "active",
+      };
+
+      await dispatch(createProduct(payload)).unwrap();
+
+      toast.success("Product added successfully!");
+
+      setIsAddOpen(false);
+      setNewProduct({
+        name: "",
+        sku: "",
+        category: "",
+        price: "",
+        stock: "",
+        image: "",
+        description: "",
+      });
+
+      dispatch(fetchProducts());
+    } catch (error: any) {
+      toast.error(error || "Failed to add product");
+    }
+  };
+
+  // =============== OPEN EDIT POPUP =================
+  const openEditPopup = (product: Product) => {
+    setEditProduct(product);
+    setIsEditOpen(true);
+  };
+
+  // =============== UPDATE PRODUCT =================
+  const handleUpdateProduct = async () => {
+    if (!editProduct) return;
+
+    try {
+      const payload: Partial<Product> = {
+        name: editProduct.name,
+        sku: editProduct.sku,
+        category: editProduct.category,
+        price: Number(editProduct.price),
+        stock: Number(editProduct.stock),
+        image: editProduct.image,
+        description: editProduct.description,
+        status:
+          Number(editProduct.stock) === 0 ? "out of stock" : "active",
+      };
+
+      await dispatch(
+        updateProduct({ id: editProduct._id, data: payload })
+      ).unwrap();
+
+      toast.success("Product updated successfully!");
+      setIsEditOpen(false);
+      dispatch(fetchProducts());
+    } catch (error: any) {
+      toast.error(error || "Failed to update");
+    }
+  };
+
+  // =============== DELETE PRODUCT =================
   const handleDelete = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      try {
-        await dispatch(deleteProduct(id)).unwrap();
-        toast.success("Product deleted successfully");
-      } catch (error: any) {
-        toast.error(error || "Failed to delete product");
-      }
+    if (!window.confirm("Delete this product?")) return;
+
+    try {
+      await dispatch(deleteProduct(id)).unwrap();
+      toast.success("Product deleted");
+    } catch {
+      toast.error("Failed to delete");
     }
   };
 
@@ -59,16 +169,13 @@ const ProductsPage: React.FC = () => {
 
   return (
     <div>
-      {/* TOP BAR */}
+      {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Products</h1>
-          <p className="text-gray-600 mt-1">
-            Manage your product inventory
-          </p>
+          <p className="text-gray-600 mt-1">Manage your product inventory</p>
         </div>
 
-        {/* OPEN POPUP */}
         <Button variant="secondary" onClick={() => setIsAddOpen(true)}>
           <PlusIcon className="w-5 h-5 inline mr-2" />
           Add Product
@@ -79,15 +186,16 @@ const ProductsPage: React.FC = () => {
       <Card className="p-6 mb-6">
         <div className="flex gap-4">
           <div className="flex-1 relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
               placeholder="Search products..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-admin-primary"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
             />
           </div>
+
           <Button variant="outline">
             <FunnelIcon className="w-5 h-5 inline mr-2" />
             Filters
@@ -97,61 +205,28 @@ const ProductsPage: React.FC = () => {
 
       {/* ADD PRODUCT POPUP */}
       {isAddOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-md p-6 rounded-lg shadow max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold mb-4">Add Product</h2>
 
             <div className="space-y-4">
+              {/* IMAGE UPLOAD */}
               <input
-                type="text"
-                placeholder="Product Name"
-                className="w-full border px-3 py-2 rounded"
-                value={newProduct.name}
-                onChange={(e) =>
-                  setNewProduct({ ...newProduct, name: e.target.value })
-                }
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  const url = await uploadImage(file);
+                  if (url) {
+                    setNewProduct({ ...newProduct, image: url });
+                    toast.success("Image uploaded!");
+                  }
+                }}
               />
 
-              <input
-                type="text"
-                placeholder="SKU"
-                className="w-full border px-3 py-2 rounded"
-                value={newProduct.sku}
-                onChange={(e) =>
-                  setNewProduct({ ...newProduct, sku: e.target.value })
-                }
-              />
-
-              <input
-                type="text"
-                placeholder="Category"
-                className="w-full border px-3 py-2 rounded"
-                value={newProduct.category}
-                onChange={(e) =>
-                  setNewProduct({ ...newProduct, category: e.target.value })
-                }
-              />
-
-              <input
-                type="number"
-                placeholder="Price"
-                className="w-full border px-3 py-2 rounded"
-                value={newProduct.price}
-                onChange={(e) =>
-                  setNewProduct({ ...newProduct, price: e.target.value })
-                }
-              />
-
-              <input
-                type="number"
-                placeholder="Stock"
-                className="w-full border px-3 py-2 rounded"
-                value={newProduct.stock}
-                onChange={(e) =>
-                  setNewProduct({ ...newProduct, stock: e.target.value })
-                }
-              />
-
+              {/* IMAGE URL */}
               <input
                 type="text"
                 placeholder="Image URL"
@@ -161,6 +236,25 @@ const ProductsPage: React.FC = () => {
                   setNewProduct({ ...newProduct, image: e.target.value })
                 }
               />
+
+              {/* FIELDS */}
+              {["name", "sku", "category", "price", "stock"].map((field) => (
+                <input
+                  key={field}
+                  type={
+                    field === "price" || field === "stock" ? "number" : "text"
+                  }
+                  placeholder={field.toUpperCase()}
+                  className="w-full border px-3 py-2 rounded"
+                  value={(newProduct as any)[field]}
+                  onChange={(e) =>
+                    setNewProduct({
+                      ...newProduct,
+                      [field]: e.target.value,
+                    })
+                  }
+                />
+              ))}
 
               <textarea
                 placeholder="Description"
@@ -183,14 +277,9 @@ const ProductsPage: React.FC = () => {
                 Cancel
               </button>
 
-              {/* SAVE PRODUCT */}
               <button
                 className="px-4 py-2 bg-primary text-white rounded"
-                onClick={() => {
-                  console.log("NEW PRODUCT ➜", newProduct);
-                  toast.success("Product added!");
-                  setIsAddOpen(false);
-                }}
+                onClick={handleAddProduct}
               >
                 Save
               </button>
@@ -199,11 +288,93 @@ const ProductsPage: React.FC = () => {
         </div>
       )}
 
+      {/* EDIT PRODUCT POPUP */}
+      {isEditOpen && editProduct && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-md p-6 rounded-lg shadow max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold mb-4">Edit Product</h2>
+
+            <div className="space-y-4">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  const url = await uploadImage(file);
+                  if (url) {
+                    setEditProduct({ ...editProduct, image: url });
+                    toast.success("Image updated!");
+                  }
+                }}
+              />
+
+              <input
+                type="text"
+                placeholder="Image URL"
+                className="w-full border px-3 py-2 rounded"
+                value={editProduct.image}
+                onChange={(e) =>
+                  setEditProduct({ ...editProduct, image: e.target.value })
+                }
+              />
+
+              {["name", "sku", "category", "price", "stock"].map((field) => (
+                <input
+                  key={field}
+                  type={
+                    field === "price" || field === "stock" ? "number" : "text"
+                  }
+                  placeholder={field.toUpperCase()}
+                  className="w-full border px-3 py-2 rounded"
+                  value={(editProduct as any)[field]}
+                  onChange={(e) =>
+                    setEditProduct({
+                      ...editProduct,
+                      [field]: e.target.value,
+                    })
+                  }
+                />
+              ))}
+
+              <textarea
+                placeholder="Description"
+                className="w-full border px-3 py-2 rounded"
+                value={editProduct.description}
+                onChange={(e) =>
+                  setEditProduct({
+                    ...editProduct,
+                    description: e.target.value,
+                  })
+                }
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                className="px-4 py-2 bg-gray-300 rounded"
+                onClick={() => setIsEditOpen(false)}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="px-4 py-2 bg-primary text-white rounded"
+                onClick={handleUpdateProduct}
+              >
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* PRODUCT TABLE */}
       {isLoading ? (
-        <div className="text-center py-12">Loading products...</div>
+        <div className="text-center py-12">Loading...</div>
       ) : (
-        <Card className="overflow-hidden">
+        <Card>
           <Table
             headers={[
               "Product",
@@ -225,9 +396,7 @@ const ProductsPage: React.FC = () => {
                       className="w-12 h-12 object-cover rounded"
                     />
                     <div>
-                      <p className="font-medium text-gray-900">
-                        {product.name}
-                      </p>
+                      <p className="font-medium">{product.name}</p>
                       <p className="text-sm text-gray-500">
                         {product.description}
                       </p>
@@ -235,51 +404,41 @@ const ProductsPage: React.FC = () => {
                   </div>
                 </TableCell>
 
-                <TableCell>
-                  <span className="text-sm text-gray-600">
-                    {product.sku}
-                  </span>
-                </TableCell>
+                <TableCell>{product.sku}</TableCell>
+                <TableCell>{product.category}</TableCell>
+                <TableCell>${product.price.toFixed(2)}</TableCell>
 
-                <TableCell>
-                  <span className="text-sm text-gray-600">
-                    {product.category}
-                  </span>
-                </TableCell>
-
-                <TableCell>
-                  <span className="font-medium">
-                    ${product.price.toFixed(2)}
-                  </span>
-                </TableCell>
-
-                <TableCell>
-                  <span
-                    className={`font-medium ${getStockColor(
-                      product.stock
-                    )}`}
-                  >
-                    {product.stock}
-                  </span>
+                <TableCell className={getStockColor(product.stock)}>
+                  {product.stock}
                 </TableCell>
 
                 <TableCell>
                   <Badge
-                    variant={
-                      product.status === "active" ? "success" : "default"
+                    variant={product.stock === 0 ? "default" : "success"}
+                    className={
+                      product.stock === 0 ? "bg-red-200 text-red-800" : ""
                     }
                   >
-                    {product.status}
+                    {product.stock === 0 ? "out of stock" : "active"}
                   </Badge>
                 </TableCell>
 
                 <TableCell>
-                  <button
-                    className="text-gray-600 hover:text-gray-900"
-                    onClick={() => handleDelete(product._id)}
-                  >
-                    <EllipsisVerticalIcon className="w-5 h-5" />
-                  </button>
+                  <div className="flex gap-4">
+                    <button
+                      className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                      onClick={() => openEditPopup(product)}
+                    >
+                      <PencilSquareIcon className="w-5 h-5" />
+                    </button>
+
+                    <button
+                      className="flex items-center gap-1 text-red-600 hover:text-red-800"
+                      onClick={() => handleDelete(product._id)}
+                    >
+                      <TrashIcon className="w-5 h-5" />
+                    </button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -291,5 +450,11 @@ const ProductsPage: React.FC = () => {
 };
 
 export default ProductsPage;
+
+
+
+
+
+
 
 

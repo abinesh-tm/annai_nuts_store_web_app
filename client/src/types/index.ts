@@ -26,7 +26,7 @@ export interface Product {
   image: string;
   images?: string[];
   stock: number;
-  status: 'active' | 'inactive';
+  status: 'active' | 'inactive'| 'out of stock';
   rating?: number;
   numReviews?: number;
   createdAt: string;
