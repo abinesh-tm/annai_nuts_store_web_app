@@ -109,7 +109,7 @@ export const createOrder = asyncHandler(async (req: AuthRequest, res: Response):
 
 
 export const updateOrderStatus = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-  const { status } = req.body;
+  const { status, shipmentId } = req.body;
 
   const order = await Order.findById(req.params.id);
 
@@ -117,13 +117,34 @@ export const updateOrderStatus = asyncHandler(async (req: AuthRequest, res: Resp
     throw new ApiError(404, 'Order not found');
   }
 
-  order.status = status;
+  // Status rules
+  const transitions: any = {
+    pending: ['processing', 'cancelled'],
+    processing: ['shipped', 'cancelled'],
+    shipped: ['delivered'],
+    delivered: [],
+    cancelled: [],
+  };
 
+  if (!transitions[order.status].includes(status)) {
+    throw new ApiError(400, `Invalid status transition from ${order.status} → ${status}`);
+  }
+
+  // Save shipment ID ONLY when marking as shipped
+  if (status === 'shipped') {
+    if (!shipmentId) {
+      throw new ApiError(400, 'Shipment ID is required to mark order as shipped');
+    }
+    order.shipmentId = shipmentId;
+  }
+
+  // Do NOT overwrite shipmentId when marking delivered
   if (status === 'delivered') {
     order.isDelivered = true;
     order.deliveredAt = new Date();
   }
 
+  order.status = status;
   await order.save();
 
   res.json({
@@ -131,4 +152,7 @@ export const updateOrderStatus = asyncHandler(async (req: AuthRequest, res: Resp
     data: order,
   });
 });
+
+  
+
 

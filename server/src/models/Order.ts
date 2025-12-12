@@ -36,6 +36,8 @@ export interface IOrder extends Document {
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   createdAt: Date;
   updatedAt: Date;
+  shipmentId:String;
+
 }
 
 const orderSchema = new Schema<IOrder>(
@@ -116,6 +118,10 @@ const orderSchema = new Schema<IOrder>(
       enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
       default: 'pending',
     },
+   shipmentId: {
+  type: String,
+  default: null,
+},
   },
   {
     timestamps: true,
