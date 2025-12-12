@@ -1,19 +1,31 @@
 export interface User {
   _id: string;
   name: string;
+
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  company?: string;
+  avatar?: string;
+
   email: string;
   role: 'customer' | 'admin';
-  phone?: string;
+
   address?: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
+    street?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    country?: string;
   };
+
   createdAt: string;
   updatedAt: string;
+
+  // Optional token for login/register
+  token?: string;
 }
+
 
 export interface Product {
   _id: string;
