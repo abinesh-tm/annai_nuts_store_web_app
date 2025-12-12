@@ -5,6 +5,7 @@ import { ArrowRightIcon, ShoppingCartIcon, HeartIcon } from '@heroicons/react/24
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { fetchProducts } from '../../store/features/products/productsSlice';
 import { addToCart } from '../../store/features/cart/cartSlice';
+import { addToWishlist } from '@/store/features/wishlist/wishlistSlice';
 import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import dryFruitsImage from '../../assets/dryFruits.svg';
@@ -167,7 +168,12 @@ const HomePage: React.FC = () => {
                   alt={product.name}
                   className="w-full h-48 object-cover"
                 />
-                <button className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-gray-100">
+                <button 
+                  onClick={() => {
+                   dispatch(addToWishlist(product));
+                   toast.success("Added to wishlist ❤️");
+                   }}
+                 className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-gray-100">
                   <HeartIcon className="w-5 h-5 text-gray-700" />
                 </button>
               </div>
