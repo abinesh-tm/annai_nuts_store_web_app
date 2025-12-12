@@ -28,14 +28,17 @@ interface RegisterData {
   role?: 'customer' | 'admin';
 }
 
+// LOGIN
 export const login = createAsyncThunk(
   'auth/login',
   async (credentials: LoginCredentials, { rejectWithValue }) => {
     try {
       const response = await api.post('/auth/login', credentials);
       const { data } = response.data;
+
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data));
+
       return data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Login failed');
@@ -43,14 +46,17 @@ export const login = createAsyncThunk(
   }
 );
 
+// REGISTER
 export const register = createAsyncThunk(
   'auth/register',
   async (userData: RegisterData, { rejectWithValue }) => {
     try {
       const response = await api.post('/auth/register', userData);
       const { data } = response.data;
+
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data));
+
       return data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Registration failed');
@@ -58,6 +64,7 @@ export const register = createAsyncThunk(
   }
 );
 
+// GET LOGGED USER
 export const getMe = createAsyncThunk(
   'auth/getMe',
   async (_, { rejectWithValue }) => {
@@ -70,6 +77,23 @@ export const getMe = createAsyncThunk(
   }
 );
 
+// ⭐ UPDATE PROFILE
+export const updateProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (profileData: Partial<User>, { rejectWithValue }) => {
+    try {
+      const response = await api.put('/auth/update-profile', profileData);
+      const { data } = response.data;
+
+      localStorage.setItem('user', JSON.stringify(data));
+
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Update failed');
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -77,6 +101,7 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.token = null;
+
       localStorage.removeItem('token');
       localStorage.removeItem('user');
     },
@@ -86,6 +111,8 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+
+      // LOGIN
       .addCase(login.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -99,6 +126,8 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
+
+      // REGISTER
       .addCase(register.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -112,12 +141,29 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
+
+      // GET LOGGED-IN USER
       .addCase(getMe.fulfilled, (state, action: PayloadAction<User>) => {
         state.user = action.payload;
+      })
+
+      // ⭐ UPDATE PROFILE
+      .addCase(updateProfile.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action: PayloadAction<User>) => {
+        state.isLoading = false;
+        state.user = action.payload;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
       });
   },
 });
 
 export const { logout, clearError } = authSlice.actions;
 export default authSlice.reducer;
+
 
